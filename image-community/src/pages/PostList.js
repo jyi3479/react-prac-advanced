@@ -1,11 +1,11 @@
 import React from "react";
-
-import Post from "../components/Post";
+import { Post, CommentWrite } from "../components";
 
 const PostList = (props) => {
   return (
     <React.Fragment>
       <Post />
+      <CommentWrite />
     </React.Fragment>
   );
 };
