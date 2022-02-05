@@ -14,7 +14,8 @@ const firebaseConfig = {
 // firebase 초기화
 firebase.initializeApp(firebaseConfig);
 
+const apiKey = firebaseConfig.apiKey;
 // 인증 만들기
 const auth = firebase.auth();
 
-export { auth };
+export { auth, apiKey };
