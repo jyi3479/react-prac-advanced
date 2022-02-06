@@ -2,7 +2,44 @@ import React from "react";
 import { Grid, Image, Text, Button, Input } from "../elements";
 import Upload from "../shared/Upload";
 
+import { useSelector, useDispatch } from "react-redux";
+import { actionCreators as postActions } from "../redux/modules/post";
+
 const PostWrite = (props) => {
+  const dispatch = useDispatch();
+  //이미 App.js에서 세션이 있는지 확인했으니, is_login만 확인하면 된다.
+  const is_login = useSelector((state) => state.user.is_login);
+  const { history } = props;
+
+  const [contents, setContents] = React.useState("");
+
+  const changeContents = (e) => {
+    setContents(e.target.value);
+  };
+
+  const addPost = () => {
+    dispatch(postActions.addPostFB(contents));
+  };
+
+  if (!is_login) {
+    return (
+      <Grid margin="100px 0px" padding="16px" center>
+        <Text size="32px" bold>
+          앗! 잠깐!
+        </Text>
+        <Text size="16px">로그인 후에만 글을 쓸 수 있어요!</Text>
+        <Button
+          _onClick={() => {
+            // push는 메인페이지 이동해도 뒤로가기 하면 write 페이지 나올 수 있다.
+            // replace는 페이지를 교체해주는 것이기 때문에 메인페이지로 이동해도 뒤로가기 누르면 write 페이지 안나온다.
+            history.replace("/");
+          }}
+        >
+          로그인 하러가기
+        </Button>
+      </Grid>
+    );
+  }
   return (
     <React.Fragment>
       <Grid padding="26px">
@@ -20,10 +57,15 @@ const PostWrite = (props) => {
         <Image shape="rectangle" />
       </Grid>
       <Grid padding="16px">
-        <Input multiLine label="게시글 내용" placeholder="게시글 작성" />
+        <Input
+          _onChange={changeContents}
+          multiLine
+          label="게시글 내용"
+          placeholder="게시글 작성"
+        />
       </Grid>
       <Grid>
-        <Button>게시글 작성</Button>
+        <Button _onClick={addPost}>게시글 작성</Button>
       </Grid>
     </React.Fragment>
   );

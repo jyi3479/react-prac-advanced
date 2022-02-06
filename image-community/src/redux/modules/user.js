@@ -132,6 +132,7 @@ const logoutFB = () => {
 export default handleActions(
   {
     [SET_USER]: (state, action) =>
+      // 불변성 관리 위해 (immer의 produce 사용)
       produce(state, (draft) => {
         setCookie("is_login", "success");
         draft.user = action.payload.user;
