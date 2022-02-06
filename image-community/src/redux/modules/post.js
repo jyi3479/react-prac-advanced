@@ -1,7 +1,9 @@
 import { createAction, handleActions } from "redux-actions";
 import { produce } from "immer";
-import { firestore } from "../../shared/firebase";
+import { firestore, storage } from "../../shared/firebase";
 import moment from "moment";
+
+import { actionCreators as imageActions } from "./image";
 
 // actions
 const SET_POST = "SET_POST";
@@ -46,16 +48,43 @@ const addPostFB = (contents = "") => {
       contents: contents,
       insert_dt: moment().format("YYYY-MM-DD hh:mm:ss"),
     };
-    postDB
-      .add({ ...user_info, ..._post })
-      .then((doc) => {
-        let post = { user_info, ..._post, id: doc.id }; // 리덕스 데이터 형식 맞추기
-        dispatch(addPost(post));
-        history.replace("/");
-      })
-      .catch((err) => {
-        console.log("포스트 작성에 실패했어요!", err);
-      });
+
+    const _image = getState().image.preview;
+    console.log(_image);
+    console.log(typeof _image);
+    // 문자열에서 storage에 업로드 하기 : data url string일 경우
+    const _upload = storage
+      .ref(`images/${user_info.user_id}_${new Date().getTime()}`)
+      .putString(_image, "data_url");
+
+    _upload.then((snapshot) => {
+      snapshot.ref
+        .getDownloadURL()
+        .then((url) => {
+          console.log(url);
+
+          return url;
+        }) // .then 하면 앞에 끝나고 return한거 가져올 수 있음.
+        .then((url) => {
+          postDB
+            .add({ ...user_info, ..._post, image_url: url }) // firestore에 넣기
+            .then((doc) => {
+              let post = { user_info, ..._post, id: doc.id, image_url: url }; // addPost 함수(리덕스에 저장)에 넣기 위해 + 리덕스 데이터 형식 맞추기
+              dispatch(addPost(post));
+              history.replace("/");
+
+              dispatch(imageActions.setPreview(null)); // 업로드 잘 되었으면 preview 이미지 없애주기
+            })
+            .catch((err) => {
+              window.alert("포스트 작성에 문제가 있어요 ;_;");
+              console.log("포스트 작성에 실패했어요!", err);
+            });
+        })
+        .catch((err) => {
+          window.alert("이미지 업로드에 문제가 있어요 ;_;");
+          console.log("이미지 업로드에 문제가 있어요!", err);
+        });
+    });
   };
 };
 

@@ -9,6 +9,7 @@ const PostWrite = (props) => {
   const dispatch = useDispatch();
   //이미 App.js에서 세션이 있는지 확인했으니, is_login만 확인하면 된다.
   const is_login = useSelector((state) => state.user.is_login);
+  const preview = useSelector((state) => state.image.preview);
   const { history } = props;
 
   const [contents, setContents] = React.useState("");
@@ -54,7 +55,14 @@ const PostWrite = (props) => {
             미리보기
           </Text>
         </Grid>
-        <Image shape="rectangle" />
+        <Image
+          shape="rectangle"
+          src={
+            preview
+              ? preview
+              : "https://usagi-post.com/wp-content/uploads/2020/05/no-image-found-360x250-1.png"
+          }
+        />
       </Grid>
       <Grid padding="16px">
         <Input
